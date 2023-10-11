@@ -15,7 +15,9 @@ class SettingsController {
   /// and sound.
   ValueNotifier<bool> muted = ValueNotifier(false);
 
-  ValueNotifier<String> playerName = ValueNotifier('Player');
+  ValueNotifier<String> player1Name = ValueNotifier('Player1');
+
+  ValueNotifier<String> player2Name = ValueNotifier('Player2');
 
   ValueNotifier<bool> soundsOn = ValueNotifier(false);
 
@@ -36,13 +38,19 @@ class SettingsController {
           .then((value) => muted.value = value),
       _persistence.getSoundsOn().then((value) => soundsOn.value = value),
       _persistence.getMusicOn().then((value) => musicOn.value = value),
-      _persistence.getPlayerName().then((value) => playerName.value = value),
+      _persistence.getPlayer1Name().then((value) => player1Name.value = value),
+      _persistence.getPlayer2Name().then((value) => player2Name.value = value)
     ]);
   }
 
-  void setPlayerName(String name) {
-    playerName.value = name;
-    _persistence.savePlayerName(playerName.value);
+  void setPlayer1Name(String name) {
+    player1Name.value = name;
+    _persistence.savePlayer1Name(player1Name.value);
+  }
+
+  void setPlayer2Name(String name) {
+    player2Name.value = name;
+    _persistence.savePlayer2Name(player2Name.value);
   }
 
   void toggleMusicOn() {

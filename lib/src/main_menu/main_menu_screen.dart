@@ -30,11 +30,12 @@ class MainMenuScreen extends StatelessWidget {
         squarishMainArea: Center(
           child: Transform.rotate(
             angle: -0.1,
-            child: const Text(
+            child:  Text(
               'Flutter Game Template!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Permanent Marker',
+                color: palette.redPen,
                 fontSize: 55,
                 height: 1,
               ),
@@ -93,6 +94,12 @@ class MainMenuScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // change palette
+        },
+        child: const Icon(Icons.play_arrow),
+      )
     );
   }
 

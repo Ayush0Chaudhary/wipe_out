@@ -7,17 +7,22 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'settings.dart';
 
-void showCustomNameDialog(BuildContext context) {
+// Player1 and Player2 enum
+enum Player { player1, player2 }
+
+void showCustomNameDialog(BuildContext context, Player player) {
   showGeneralDialog(
       context: context,
       pageBuilder: (context, animation, secondaryAnimation) =>
-          CustomNameDialog(animation: animation));
+          CustomNameDialog(animation: animation, player: player));
 }
 
 class CustomNameDialog extends StatefulWidget {
   final Animation<double> animation;
+  final Player player;
 
-  const CustomNameDialog({required this.animation, super.key});
+  const CustomNameDialog(
+      {required this.animation, required this.player, super.key});
 
   @override
   State<CustomNameDialog> createState() => _CustomNameDialogState();
@@ -34,7 +39,8 @@ class _CustomNameDialogState extends State<CustomNameDialog> {
         curve: Curves.easeOutCubic,
       ),
       child: SimpleDialog(
-        title: const Text('Change name'),
+        title: Text(
+            'Change ${widget.player == Player.player1 ? 'Player1' : 'Player2'} name'),
         children: [
           TextField(
             controller: _controller,
@@ -45,7 +51,10 @@ class _CustomNameDialogState extends State<CustomNameDialog> {
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.done,
             onChanged: (value) {
-              context.read<SettingsController>().setPlayerName(value);
+              widget.player == Player.player1
+                  ? context.read<SettingsController>().player1Name.value = value
+                  : context.read<SettingsController>().player2Name.value =
+                      value;
             },
             onSubmitted: (value) {
               // Player tapped 'Submit'/'Done' on their keyboard.
@@ -63,7 +72,9 @@ class _CustomNameDialogState extends State<CustomNameDialog> {
 
   @override
   void didChangeDependencies() {
-    _controller.text = context.read<SettingsController>().playerName.value;
+    _controller.text = widget.player==Player.player1
+        ? context.read<SettingsController>().player1Name.value
+        : context.read<SettingsController>().player2Name.value;
     super.didChangeDependencies();
   }
 
