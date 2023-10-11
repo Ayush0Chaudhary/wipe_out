@@ -40,7 +40,12 @@ class SettingsScreen extends StatelessWidget {
             ),
             _gap,
             const _NameChangeLine(
-              'Name',
+              'Player1:',
+              Player.player1
+            ),
+            const _NameChangeLine(
+              'Player2:',
+              Player.player2
             ),
             ValueListenableBuilder<bool>(
               valueListenable: settings.soundsOn,
@@ -114,8 +119,9 @@ class SettingsScreen extends StatelessWidget {
 
 class _NameChangeLine extends StatelessWidget {
   final String title;
+  final Player player;
 
-  const _NameChangeLine(this.title);
+  const _NameChangeLine(this.title, this.player);
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +129,7 @@ class _NameChangeLine extends StatelessWidget {
 
     return InkResponse(
       highlightShape: BoxShape.rectangle,
-      onTap: () => showCustomNameDialog(context),
+      onTap: () => showCustomNameDialog(context,player),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Row(
@@ -136,7 +142,9 @@ class _NameChangeLine extends StatelessWidget {
                 )),
             const Spacer(),
             ValueListenableBuilder(
-              valueListenable: settings.playerName,
+              valueListenable: player == Player.player1
+                  ? settings.player1Name
+                  : settings.player2Name,
               builder: (context, name, child) => Text(
                 '‘$name’',
                 style: const TextStyle(

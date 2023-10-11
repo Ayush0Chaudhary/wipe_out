@@ -11,7 +11,8 @@ abstract class SettingsPersistence {
 
   Future<bool> getMuted({required bool defaultValue});
 
-  Future<String> getPlayerName();
+  Future<String> getPlayer1Name();
+  Future<String> getPlayer2Name();
 
   Future<bool> getSoundsOn();
 
@@ -19,7 +20,9 @@ abstract class SettingsPersistence {
 
   Future<void> saveMuted(bool value);
 
-  Future<void> savePlayerName(String value);
+  Future<void> savePlayer1Name(String value);
+
+  Future<void> savePlayer2Name(String value);
 
   Future<void> saveSoundsOn(bool value);
 }

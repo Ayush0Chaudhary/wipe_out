@@ -13,6 +13,7 @@ import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:game_template/src/change_name/change_name_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -23,9 +24,8 @@ import 'src/audio/audio_controller.dart';
 import 'src/games_services/games_services.dart';
 import 'src/games_services/score.dart';
 import 'src/in_app_purchase/in_app_purchase.dart';
-import 'src/level_selection/level_selection_screen.dart';
-import 'src/level_selection/levels.dart';
 import 'src/main_menu/main_menu_screen.dart';
+import 'src/play_session/grid_provider.dart';
 import 'src/play_session/play_session_screen.dart';
 import 'src/player_progress/persistence/local_storage_player_progress_persistence.dart';
 import 'src/player_progress/persistence/player_progress_persistence.dart';
@@ -138,23 +138,16 @@ class MyApp extends StatelessWidget {
                 path: 'play',
                 pageBuilder: (context, state) => buildMyTransition<void>(
                       key: ValueKey('play'),
-                      child: const LevelSelectionScreen(
-                        key: Key('level selection'),
-                      ),
+                      child: const ChangeNameScreen(key: Key('change name')),
                       color: context.watch<Palette>().backgroundLevelSelection,
                     ),
                 routes: [
                   GoRoute(
-                    path: 'session/:level',
+                    path: 'session',
                     pageBuilder: (context, state) {
-                      final levelNumber =
-                          int.parse(state.pathParameters['level']!);
-                      final level = gameLevels
-                          .singleWhere((e) => e.number == levelNumber);
                       return buildMyTransition<void>(
                         key: ValueKey('level'),
                         child: PlaySessionScreen(
-                          level,
                           key: const Key('play session'),
                         ),
                         color: context.watch<Palette>().backgroundPlaySession,
@@ -228,6 +221,12 @@ class MyApp extends StatelessWidget {
               return progress;
             },
           ),
+          ChangeNotifierProvider(
+            create: (context) {
+              var grid = Grid();
+              return grid;
+            },
+            ),
           Provider<GamesServicesController?>.value(
               value: gamesServicesController),
           Provider<AdsController?>.value(value: adsController),
