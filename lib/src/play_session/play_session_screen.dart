@@ -3,9 +3,12 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:game_template/src/play_session/grid_constants.dart';
+import 'package:game_template/src/settings/custom_name_dialog.dart';
+import 'package:game_template/src/settings/settings.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart' hide Level;
 import 'package:provider/provider.dart';
@@ -165,22 +168,86 @@ class GameGrid extends StatefulWidget {
 }
 
 class _GameGridState extends State<GameGrid> {
-  late List<List<int>> gridColor;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    List<int> temp = List.filled(5, 0);
-    gridColor = List.filled(5, temp);
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     final gridProvider = context.watch<Grid>();
+    final palette = context.watch<Palette>();
+    final settings = context.watch<SettingsController>();
     return Center(
       child: Column(
         children: [
+          Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(
+                    settings.player1Name.value,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Permanent Marker',
+                      color: palette.pen,
+                      fontSize: 15,
+                      height: 1,
+                    ),
+                  ),
+                  Text(
+                    settings.player2Name.value,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Permanent Marker',
+                      color: palette.redPen,
+                      fontSize: 15,
+                      height: 1,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(
+                    "12",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Permanent Marker',
+                      color: palette.pen,
+                      fontSize: 15,
+                      height: 1,
+                    ),
+                  ),
+                  Text(
+                    "23",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Permanent Marker',
+                      color: palette.redPen,
+                      fontSize: 15,
+                      height: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 60,
+          ),
+          Text(
+            gridProvider.getPlayer()
+                ? "${settings.player1Name.value}'s turn"
+                : "${settings.player2Name.value}'s turn",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Permanent Marker',
+              color: gridProvider.getPlayer() ? palette.pen : palette.redPen,
+              fontSize: 30,
+              height: 1,
+            ),
+          ),
+          SizedBox(
+            height: 60,
+          ),
           // dot and Bar
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -196,6 +263,14 @@ class _GameGridState extends State<GameGrid> {
                                 gridProvider.incrementGridCount(0, y);
                               }
                               gridProvider.setDot1(0, y, true);
+                              if (gridProvider.getGridCount(0, y) != 4) {
+                                gridProvider.setPlayer();
+                              } else {
+                                if (gridProvider.getWinner(0, y) == -1) {
+                                  int winner = gridProvider.getPlayer() ? 1 : 0;
+                                  gridProvider.setWinner(0, y, winner);
+                                }
+                              }
                             },
                             child: horizontalBar(gridProvider.getStick1(0, y)),
                           ),
@@ -217,14 +292,25 @@ class _GameGridState extends State<GameGrid> {
                             return;
                           }
                           gridProvider.setDot2(x, 0, true);
-                            gridProvider.incrementGridCount(x, 0);
+                          gridProvider.incrementGridCount(x, 0);
+                          if (gridProvider.getGridCount(x, 0) != 4) {
+                            gridProvider.setPlayer();
+                          } else {
+                            if (gridProvider.getWinner(x, 0) == -1) {
+                              int winner = gridProvider.getPlayer() ? 1 : 0;
+                              gridProvider.setWinner(x, 0, winner);
+                            }
+                          }
                         },
                         child: verticalBar(gridProvider.getStick2(x, 0))),
                     ...List.generate(
                         grid_size,
                         (y) => Row(
                               children: [
-                                box(Colors.red,
+                                box(
+                                    gridProvider.getWinner(x, y) == 1
+                                        ? palette.pen
+                                        : palette.redPen,
                                     visible:
                                         gridProvider.getGridCount(x, y) == 4),
                                 InkWell(
@@ -232,12 +318,45 @@ class _GameGridState extends State<GameGrid> {
                                     if (gridProvider.getStick2(x, y + 1)) {
                                       return;
                                     }
-                                      gridProvider.incrementGridCount(x, y);
-                                      if (y != grid_size - 1) {
-                                        gridProvider.incrementGridCount(
-                                            x, y + 1);
-                                      }
+                                    gridProvider.incrementGridCount(x, y);
+                                    if (y != grid_size - 1) {
+                                      gridProvider.incrementGridCount(x, y + 1);
+                                    }
                                     gridProvider.setDot2(x, y + 1, true);
+                                    if (y != grid_size - 1) {
+                                      if (gridProvider.getGridCount(x, y) !=
+                                              4 &&
+                                          gridProvider.getGridCount(x, y + 1) !=
+                                              4) {
+                                        gridProvider.setPlayer();
+                                      } else {
+                                        if (gridProvider.getWinner(x, y) ==
+                                            -1) {
+                                          int winner =
+                                              gridProvider.getPlayer() ? 1 : 0;
+                                          gridProvider.setWinner(x, y, winner);
+                                        }
+                                        if (gridProvider.getWinner(x, y + 1) ==
+                                            -1) {
+                                          int winner =
+                                              gridProvider.getPlayer() ? 1 : 0;
+                                          gridProvider.setWinner(
+                                              x, y + 1, winner);
+                                        }
+                                      }
+                                    } else {
+                                      if (gridProvider.getGridCount(x, y) !=
+                                          4) {
+                                        gridProvider.setPlayer();
+                                      } else {
+                                        if (gridProvider.getWinner(x, y) ==
+                                            -1) {
+                                          int winner =
+                                              gridProvider.getPlayer() ? 1 : 0;
+                                          gridProvider.setWinner(x, y, winner);
+                                        }
+                                      }
+                                    }
                                   },
                                   child: verticalBar(
                                       gridProvider.getStick2(x, y + 1)),
@@ -257,7 +376,7 @@ class _GameGridState extends State<GameGrid> {
                               children: [
                                 InkWell(
                                     onTap: () {
-                                      if(gridProvider.getStick1(x+1, y)) {
+                                      if (gridProvider.getStick1(x + 1, y)) {
                                         return;
                                       }
                                       gridProvider.incrementGridCount(x, y);
@@ -265,8 +384,51 @@ class _GameGridState extends State<GameGrid> {
                                         gridProvider.incrementGridCount(
                                             x + 1, y);
                                       }
+                                      if (x != grid_size - 1) {
+                                        if (gridProvider.getGridCount(x, y) !=
+                                                4 &&
+                                            gridProvider.getGridCount(
+                                                    x + 1, y) !=
+                                                4) {
+                                          gridProvider.setPlayer();
+                                        } else {
+                                          if (gridProvider.getWinner(x, y) ==
+                                              -1) {
+                                            int winner =
+                                                gridProvider.getPlayer()
+                                                    ? 1
+                                                    : 0;
+                                            gridProvider.setWinner(
+                                                x, y, winner);
+                                          }
+                                          if (gridProvider.getWinner(
+                                                  x + 1, y) ==
+                                              -1) {
+                                            int winner =
+                                                gridProvider.getPlayer()
+                                                    ? 1
+                                                    : 0;
+                                            gridProvider.setWinner(
+                                                x + 1, y, winner);
+                                          }
+                                        }
+                                      } else {
+                                        if (gridProvider.getGridCount(x, y) !=
+                                            4) {
+                                          gridProvider.setPlayer();
+                                        } else {
+                                          if (gridProvider.getWinner(x, y) ==
+                                              -1) {
+                                            int winner =
+                                                gridProvider.getPlayer()
+                                                    ? 1
+                                                    : 0;
+                                            gridProvider.setWinner(
+                                                x, y, winner);
+                                          }
+                                        }
+                                      }
                                       gridProvider.setDot1(x + 1, y, true);
-                                      // gridColor[][],
                                     },
                                     child: horizontalBar(
                                         gridProvider.getStick1(x + 1, y))),
