@@ -177,7 +177,7 @@ class _GameGridState extends State<GameGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final grid_provider = context.watch<Grid>();
+    final gridProvider = context.watch<Grid>();
     return Center(
       child: Column(
         children: [
@@ -191,10 +191,13 @@ class _GameGridState extends State<GameGrid> {
                   (y) => Row(
                         children: [
                           InkWell(
-                            onTap:(){
-                              grid_provider.setDot1(0, y, true);
+                            onTap: () {
+                              if (!gridProvider.getStick1(0, y)) {
+                                gridProvider.incrementGridCount(0, y);
+                              }
+                              gridProvider.setDot1(0, y, true);
                             },
-                              child: horizontalBar(grid_provider.getStick1(0, y)),
+                            child: horizontalBar(gridProvider.getStick1(0, y)),
                           ),
                           dot(),
                         ],
@@ -210,19 +213,34 @@ class _GameGridState extends State<GameGrid> {
                   children: [
                     InkWell(
                         onTap: () {
-                          grid_provider.setDot2(x, 0, true);
+                          if (gridProvider.getStick2(x, 0)) {
+                            return;
+                          }
+                          gridProvider.setDot2(x, 0, true);
+                            gridProvider.incrementGridCount(x, 0);
                         },
-                        child: verticalBar(grid_provider.getStick2(x, 0))),
+                        child: verticalBar(gridProvider.getStick2(x, 0))),
                     ...List.generate(
                         grid_size,
                         (y) => Row(
                               children: [
-                                box(Colors.red),
+                                box(Colors.red,
+                                    visible:
+                                        gridProvider.getGridCount(x, y) == 4),
                                 InkWell(
                                   onTap: () {
-                                    grid_provider.setDot2(x, y+1, true);
+                                    if (gridProvider.getStick2(x, y + 1)) {
+                                      return;
+                                    }
+                                      gridProvider.incrementGridCount(x, y);
+                                      if (y != grid_size - 1) {
+                                        gridProvider.incrementGridCount(
+                                            x, y + 1);
+                                      }
+                                    gridProvider.setDot2(x, y + 1, true);
                                   },
-                                  child: verticalBar(grid_provider.getStick2(x, y+1)),
+                                  child: verticalBar(
+                                      gridProvider.getStick2(x, y + 1)),
                                 ),
                               ],
                             )),
@@ -237,10 +255,21 @@ class _GameGridState extends State<GameGrid> {
                         grid_size,
                         (y) => Row(
                               children: [
-                                InkWell(onTap: () {
-                                  grid_provider.setDot1(x+1, y, true);
-                                  // gridColor[][],
-                                }, child: horizontalBar(grid_provider.getStick1(x+1, y))),
+                                InkWell(
+                                    onTap: () {
+                                      if(gridProvider.getStick1(x+1, y)) {
+                                        return;
+                                      }
+                                      gridProvider.incrementGridCount(x, y);
+                                      if (x != grid_size - 1) {
+                                        gridProvider.incrementGridCount(
+                                            x + 1, y);
+                                      }
+                                      gridProvider.setDot1(x + 1, y, true);
+                                      // gridColor[][],
+                                    },
+                                    child: horizontalBar(
+                                        gridProvider.getStick1(x + 1, y))),
                                 dot(),
                               ],
                             )),
@@ -261,7 +290,7 @@ Widget horizontalBar(bool visible) {
     width: bar_size,
     decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: visible ? Colors.blue : Colors.transparent ,
+        color: visible ? Colors.blue : const Color.fromARGB(75, 0, 0, 0),
         shape: BoxShape.rectangle),
   );
 }
@@ -272,7 +301,7 @@ Widget verticalBar(bool visible) {
     width: dot_size,
     decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: visible ? Colors.blue : Colors.transparent ,
+        color: visible ? Colors.blue : const Color.fromARGB(75, 0, 0, 0),
         shape: BoxShape.rectangle),
   );
 }
@@ -285,10 +314,11 @@ Widget dot() {
   );
 }
 
-Widget box(Color color) {
+Widget box(Color color, {bool visible = false}) {
   return Container(
     width: bar_size,
     height: bar_size,
-    decoration: BoxDecoration(color: color, shape: BoxShape.rectangle),
+    decoration: BoxDecoration(
+        color: visible ? color : Colors.transparent, shape: BoxShape.rectangle),
   );
 }

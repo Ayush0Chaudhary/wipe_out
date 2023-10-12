@@ -24,6 +24,19 @@ class Grid extends ChangeNotifier {
 
   int getGridCount(int x, int y) => _gridCount[x][y];
 
+  void setGridCount(int x, int y, int value) {
+    _gridCount[x][y] = value;
+    // log all grid count as a grid view
+    print(_gridCount);
+    notifyListeners();
+  }
+
+  void incrementGridCount(int x, int y) {
+    if(_gridCount[x][y]!=4)
+    _gridCount[x][y]++;
+    notifyListeners();
+  }
+
   void reset1() {
     for (var x = 0; x < grid_size+1; x++) {
       for (var y = 0; y < grid_size; y++) {
