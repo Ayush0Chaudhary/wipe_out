@@ -207,7 +207,7 @@ class _GameGridState extends State<GameGrid> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Text(
-                    "12",
+                    gridProvider.getp1().toString(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Permanent Marker',
@@ -217,7 +217,7 @@ class _GameGridState extends State<GameGrid> {
                     ),
                   ),
                   Text(
-                    "23",
+                    gridProvider.getp2().toString(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Permanent Marker',
@@ -315,6 +315,9 @@ class _GameGridState extends State<GameGrid> {
                                         gridProvider.getGridCount(x, y) == 4),
                                 InkWell(
                                   onTap: () {
+                                    bool scored = false;
+                                    int winner =
+                                        gridProvider.getPlayer() ? 1 : 0;
                                     if (gridProvider.getStick2(x, y + 1)) {
                                       return;
                                     }
@@ -323,39 +326,25 @@ class _GameGridState extends State<GameGrid> {
                                       gridProvider.incrementGridCount(x, y + 1);
                                     }
                                     gridProvider.setDot2(x, y + 1, true);
-                                    if (y != grid_size - 1) {
-                                      if (gridProvider.getGridCount(x, y) !=
-                                              4 &&
-                                          gridProvider.getGridCount(x, y + 1) !=
-                                              4) {
-                                        gridProvider.setPlayer();
-                                      } else {
-                                        if (gridProvider.getWinner(x, y) ==
-                                            -1) {
-                                          int winner =
-                                              gridProvider.getPlayer() ? 1 : 0;
-                                          gridProvider.setWinner(x, y, winner);
-                                        }
-                                        if (gridProvider.getWinner(x, y + 1) ==
-                                            -1) {
-                                          int winner =
-                                              gridProvider.getPlayer() ? 1 : 0;
-                                          gridProvider.setWinner(
-                                              x, y + 1, winner);
-                                        }
+
+                                    if (gridProvider.getGridCount(x, y) == 4) {
+                                      if (gridProvider.getWinner(x, y) == -1) {
+                                        gridProvider.setWinner(x, y, winner);
+                                        scored = true;
                                       }
-                                    } else {
-                                      if (gridProvider.getGridCount(x, y) !=
-                                          4) {
-                                        gridProvider.setPlayer();
-                                      } else {
-                                        if (gridProvider.getWinner(x, y) ==
-                                            -1) {
-                                          int winner =
-                                              gridProvider.getPlayer() ? 1 : 0;
-                                          gridProvider.setWinner(x, y, winner);
-                                        }
+                                    }
+                                    if (y != grid_size - 1 &&
+                                        gridProvider.getGridCount(x, y + 1) ==
+                                            4) {
+                                      if (gridProvider.getWinner(x, y + 1) ==
+                                          -1) {
+                                        gridProvider.setWinner(
+                                            x, y + 1, winner);
+                                        scored = true;
                                       }
+                                    }
+                                    if (scored == false) {
+                                      gridProvider.setPlayer();
                                     }
                                   },
                                   child: verticalBar(
@@ -376,6 +365,15 @@ class _GameGridState extends State<GameGrid> {
                               children: [
                                 InkWell(
                                     onTap: () {
+                                      /// to keep track of current player in integer form, no bool to int like cpp :(
+                                      ///
+                                      int winner =
+                                          gridProvider.getPlayer() ? 1 : 0;
+
+                                      /// To keep check whether the player scored in current move
+                                      ///
+                                      bool scored = false;
+
                                       if (gridProvider.getStick1(x + 1, y)) {
                                         return;
                                       }
@@ -384,50 +382,60 @@ class _GameGridState extends State<GameGrid> {
                                         gridProvider.incrementGridCount(
                                             x + 1, y);
                                       }
+
+                                      /// Now checking for the block with coordinate {x, y}
+                                      ///
+                                      /// if eligible for the being part of someone score
+                                      if (gridProvider.getGridCount(x, y) ==
+                                          4) {
+                                        /// checking whether the block is already assigned to someone.
+                                        if (gridProvider.getWinner(x, y) ==
+                                            -1) {
+                                          /// enter here when block not assigned to anyone
+                                          ///
+                                          /// Now assign the block win to current player
+                                          gridProvider.setWinner(x, y, winner);
+
+                                          /// Telling our code that player have scored
+                                          ///
+                                          scored = true;
+                                        }
+                                      }
+
+                                      /// Now checking for the block with coordinate {x+1, y}
+                                      ///
+                                      /// if the stick even have next block, the adjacent case
                                       if (x != grid_size - 1) {
-                                        if (gridProvider.getGridCount(x, y) !=
-                                                4 &&
-                                            gridProvider.getGridCount(
-                                                    x + 1, y) !=
-                                                4) {
-                                          gridProvider.setPlayer();
-                                        } else {
-                                          if (gridProvider.getWinner(x, y) ==
-                                              -1) {
-                                            int winner =
-                                                gridProvider.getPlayer()
-                                                    ? 1
-                                                    : 0;
-                                            gridProvider.setWinner(
-                                                x, y, winner);
-                                          }
+                                        /// we know now the block exist, pheww!
+                                        ///
+                                        /// below if statement checks whether
+                                        /// the block is eligible to be part of someone score
+                                        if (gridProvider.getGridCount(
+                                                x + 1, y) ==
+                                            4) {
+                                          /// Making sure the {x+1, y} block is not assigned.
+                                          ///
                                           if (gridProvider.getWinner(
                                                   x + 1, y) ==
                                               -1) {
-                                            int winner =
-                                                gridProvider.getPlayer()
-                                                    ? 1
-                                                    : 0;
+                                            /// now assignation of the current block to current player
+                                            ///
                                             gridProvider.setWinner(
                                                 x + 1, y, winner);
-                                          }
-                                        }
-                                      } else {
-                                        if (gridProvider.getGridCount(x, y) !=
-                                            4) {
-                                          gridProvider.setPlayer();
-                                        } else {
-                                          if (gridProvider.getWinner(x, y) ==
-                                              -1) {
-                                            int winner =
-                                                gridProvider.getPlayer()
-                                                    ? 1
-                                                    : 0;
-                                            gridProvider.setWinner(
-                                                x, y, winner);
+
+                                            /// Telling our code that player have scored
+                                            ///
+                                            scored = true;
                                           }
                                         }
                                       }
+
+                                      /// if the player have scored, he gets another chance, yaay!
+                                      ///
+                                      if (scored == false) {
+                                        gridProvider.setPlayer();
+                                      }
+                                      /// marking the stick touched :)
                                       gridProvider.setDot1(x + 1, y, true);
                                     },
                                     child: horizontalBar(

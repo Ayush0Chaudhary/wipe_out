@@ -12,7 +12,12 @@ class Grid extends ChangeNotifier {
       List.generate(grid_size, (index) => List.filled(grid_size, 0));
   final List<List<int>> _gridWinner =
       List.generate(grid_size, (index) => List.filled(grid_size, -1));
-   bool _player = true;
+  bool _player = true;
+  int _p1 = 0;
+  int _p2 = 0;
+
+  int getp1() => _p1;
+  int getp2() => _p2;
 
   bool getStick1(int x, int y) => _grid1[x][y];
   bool getStick2(int x, int y) => _grid2[x][y];
@@ -37,12 +42,21 @@ class Grid extends ChangeNotifier {
   }
 
   // call the setWinner after you are sure you have the right player
-  void setWinner(int x, int y, int winner){
-    if(_gridWinner[x][y] == -1) {
+  void setWinner(int x, int y, int winner) {
+    if (_gridWinner[x][y] == -1) {
       _gridWinner[x][y] = winner;
+      if (winner == 1) {
+        _p1++;
+      } else {
+        _p2++;
+      }
+    }
+    for (int i = 0; i < _gridWinner.length; i++) {
+      print(_gridWinner[i]);
     }
     notifyListeners();
   }
+
   void setGridCount(int x, int y, int value) {
     _gridCount[x][y] = value;
     // log all grid count as a grid view
@@ -51,12 +65,16 @@ class Grid extends ChangeNotifier {
   }
 
   void incrementGridCount(int x, int y) {
-    print("$x ,$y");
+    // print("$x ,$y");
+
     if (_gridCount[x][y] != 4) {
       _gridCount[x][y]++;
     }
-      notifyListeners();
+    for (int i = 0; i < _gridWinner.length; i++) {
+      print(_gridCount[i]);
+    }
 
+    notifyListeners();
   }
 
   void reset1() {
