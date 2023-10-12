@@ -157,98 +157,122 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
   }
 }
 
-class GameGrid extends StatelessWidget {
+class GameGrid extends StatefulWidget {
   const GameGrid({super.key});
 
   @override
+  State<GameGrid> createState() => _GameGridState();
+}
+
+class _GameGridState extends State<GameGrid> {
+  late List<List<int>> gridColor;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    List<int> temp = List.filled(5, 0);
+    gridColor = List.filled(5, temp);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final grid = context.watch<Grid>();
-    return Container(
-      child: Center(
-        child: Column(
-          children: [
-            // dot and Bar
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+    final grid_provider = context.watch<Grid>();
+    return Center(
+      child: Column(
+        children: [
+          // dot and Bar
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              dot(),
+              ...List.generate(
+                  grid_size,
+                  (y) => Row(
+                        children: [
+                          InkWell(
+                            onTap:(){
+                              grid_provider.setDot1(0, y, true);
+                            },
+                              child: horizontalBar(grid_provider.getStick1(0, y)),
+                          ),
+                          dot(),
+                        ],
+                      )),
+            ],
+          ),
+          ...List.generate(grid_size, (x) {
+            return Column(
               children: [
-                dot(),
-                ...List.generate(
-                    grid_size,
-                    (y) => Row(
-                          children: [
-                            horizontalBar(),
-                            dot(),
-                          ],
-                        )),
+                // bar and box
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                        onTap: () {
+                          grid_provider.setDot2(x, 0, true);
+                        },
+                        child: verticalBar(grid_provider.getStick2(x, 0))),
+                    ...List.generate(
+                        grid_size,
+                        (y) => Row(
+                              children: [
+                                box(Colors.red),
+                                InkWell(
+                                  onTap: () {
+                                    grid_provider.setDot2(x, y+1, true);
+                                  },
+                                  child: verticalBar(grid_provider.getStick2(x, y+1)),
+                                ),
+                              ],
+                            )),
+                  ],
+                ),
+                // dot and bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    dot(),
+                    ...List.generate(
+                        grid_size,
+                        (y) => Row(
+                              children: [
+                                InkWell(onTap: () {
+                                  grid_provider.setDot1(x+1, y, true);
+                                  // gridColor[][],
+                                }, child: horizontalBar(grid_provider.getStick1(x+1, y))),
+                                dot(),
+                              ],
+                            )),
+                  ],
+                ),
               ],
-            ),
-            ...List.generate(grid_size, (x) {
-              return Column(
-                children: [
-                  // bar and box
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      verticalBar(),
-                      ...List.generate(
-                          grid_size,
-                          (y) => Row(
-                                children: [
-                                  box(Colors.red),
-                                  InkWell(
-                                    onTap: (){
-                                      print('(x,y) = (${x},${y+1})');
-                                    },
-                                    child: verticalBar(),
-                                    ),
-                                ],
-                              )),
-                    ],
-                  ),
-                  // dot and bar
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      dot(),
-                      ...List.generate(
-                          grid_size,
-                          (y) => Row(
-                                children: [
-                                  horizontalBar(),
-                                  dot(),
-                                ],
-                              )),
-                    ],
-                  ),
-                ],
-              );
-            })
-          ],
-        ),
+            );
+          })
+        ],
       ),
     );
   }
 }
 
-
-Widget horizontalBar() {
+Widget horizontalBar(bool visible) {
   return Container(
     height: dot_size,
     width: bar_size,
     decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.blue,
+        color: visible ? Colors.blue : Colors.transparent ,
         shape: BoxShape.rectangle),
   );
 }
 
-Widget verticalBar() {
+Widget verticalBar(bool visible) {
   return Container(
     height: bar_size,
     width: dot_size,
     decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.blue,
+        color: visible ? Colors.blue : Colors.transparent ,
         shape: BoxShape.rectangle),
   );
 }
