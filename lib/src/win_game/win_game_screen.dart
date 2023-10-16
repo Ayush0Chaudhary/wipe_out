@@ -14,11 +14,8 @@ import '../style/palette.dart';
 import '../style/responsive_screen.dart';
 
 class WinGameScreen extends StatelessWidget {
-  final Score score;
-
   const WinGameScreen({
     super.key,
-    required this.score,
   });
 
   @override
@@ -51,14 +48,6 @@ class WinGameScreen extends StatelessWidget {
               ),
             ),
             gap,
-            Center(
-              child: Text(
-                'Score: ${score.score}\n'
-                'Time: ${score.formattedTime}',
-                style: const TextStyle(
-                    fontFamily: 'Permanent Marker', fontSize: 20),
-              ),
-            ),
           ],
         ),
         rectangularMenuArea: FilledButton(

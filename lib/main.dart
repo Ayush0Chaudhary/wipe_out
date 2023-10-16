@@ -173,7 +173,6 @@ class MyApp extends StatelessWidget {
                       return buildMyTransition<void>(
                         key: ValueKey('won'),
                         child: WinGameScreen(
-                          score: score,
                           key: const Key('win game'),
                         ),
                         color: context.watch<Palette>().backgroundPlaySession,

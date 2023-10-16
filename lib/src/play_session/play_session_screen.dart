@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:game_template/src/game_internals/not_very_silly_game_state.dart';
 import 'package:game_template/src/play_session/grid_constants.dart';
 import 'package:game_template/src/settings/custom_name_dialog.dart';
 import 'package:game_template/src/settings/settings.dart';
@@ -35,7 +36,7 @@ class PlaySessionScreen extends StatefulWidget {
 class _PlaySessionScreenState extends State<PlaySessionScreen> {
   static final _log = Logger('PlaySessionScreen');
 
-  static const _celebrationDuration = Duration(milliseconds: 2000);
+  static const _celebrationDuration = Duration(milliseconds: 3000);
 
   static const _preCelebrationDuration = Duration(milliseconds: 500);
 
@@ -47,54 +48,60 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
 
-    return IgnorePointer(
-      ignoring: _duringCelebration,
-      child: Scaffold(
-        backgroundColor: palette.backgroundPlaySession,
-        body: Stack(
-          children: [
-            Center(
-              // This is the entirety of the "game".
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: InkResponse(
-                      onTap: () => GoRouter.of(context).push('/settings'),
-                      child: Image.asset(
-                        'assets/images/settings.png',
-                        semanticLabel: 'Settings',
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+            create: (context) => GameState(onWin: _playerWon))
+      ],
+      child: IgnorePointer(
+        ignoring: _duringCelebration,
+        child: Scaffold(
+          backgroundColor: palette.backgroundPlaySession,
+          body: Stack(
+            children: [
+              Center(
+                // This is the entirety of the "game".
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: InkResponse(
+                        onTap: () => GoRouter.of(context).push('/settings'),
+                        child: Image.asset(
+                          'assets/images/settings.png',
+                          semanticLabel: 'Settings',
+                        ),
                       ),
                     ),
-                  ),
-                  const Spacer(),
-                  GameGrid(),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: () => GoRouter.of(context).go('/play'),
-                        child: const Text('Back'),
+                    const Spacer(),
+                    GameGrid(),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () => GoRouter.of(context).go('/play'),
+                          child: const Text('Back'),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            SizedBox.expand(
-              child: Visibility(
-                visible: _duringCelebration,
-                child: IgnorePointer(
-                  child: Confetti(
-                    isStopped: !_duringCelebration,
+              SizedBox.expand(
+                child: Visibility(
+                  visible: _duringCelebration,
+                  child: IgnorePointer(
+                    child: Confetti(
+                      isStopped: !_duringCelebration,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -156,7 +163,9 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     await Future<void>.delayed(_celebrationDuration);
     if (!mounted) return;
 
-    // GoRouter.of(context).go('/play/won', extra: {'score': score});
+    GoRouter.of(context).go(
+      '/',
+    );
   }
 }
 
@@ -173,284 +182,308 @@ class _GameGridState extends State<GameGrid> {
     final gridProvider = context.watch<Grid>();
     final palette = context.watch<Palette>();
     final settings = context.watch<SettingsController>();
-    return Center(
-      child: Column(
-        children: [
-          Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(
-                    settings.player1Name.value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Permanent Marker',
-                      color: palette.pen,
-                      fontSize: 15,
-                      height: 1,
-                    ),
-                  ),
-                  Text(
-                    settings.player2Name.value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Permanent Marker',
-                      color: palette.redPen,
-                      fontSize: 15,
-                      height: 1,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(
-                    gridProvider.getp1().toString(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Permanent Marker',
-                      color: palette.pen,
-                      fontSize: 15,
-                      height: 1,
-                    ),
-                  ),
-                  Text(
-                    gridProvider.getp2().toString(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Permanent Marker',
-                      color: palette.redPen,
-                      fontSize: 15,
-                      height: 1,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 60,
-          ),
-          Text(
-            gridProvider.getPlayer()
-                ? "${settings.player1Name.value}'s turn"
-                : "${settings.player2Name.value}'s turn",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Permanent Marker',
-              color: gridProvider.getPlayer() ? palette.pen : palette.redPen,
-              fontSize: 30,
-              height: 1,
-            ),
-          ),
-          SizedBox(
-            height: 60,
-          ),
-          // dot and Bar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              dot(),
-              ...List.generate(
-                  grid_size,
-                  (y) => Row(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              if (!gridProvider.getStick1(0, y)) {
-                                gridProvider.incrementGridCount(0, y);
-                              }
-                              gridProvider.setDot1(0, y, true);
-                              if (gridProvider.getGridCount(0, y) != 4) {
-                                gridProvider.setPlayer();
-                              } else {
-                                if (gridProvider.getWinner(0, y) == -1) {
-                                  int winner = gridProvider.getPlayer() ? 1 : 0;
-                                  gridProvider.setWinner(0, y, winner);
-                                }
-                              }
-                            },
-                            child: horizontalBar(gridProvider.getStick1(0, y)),
-                          ),
-                          dot(),
-                        ],
-                      )),
-            ],
-          ),
-          ...List.generate(grid_size, (x) {
-            return Column(
-              children: [
-                // bar and box
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    InkWell(
-                        onTap: () {
-                          if (gridProvider.getStick2(x, 0)) {
-                            return;
-                          }
-                          gridProvider.setDot2(x, 0, true);
-                          gridProvider.incrementGridCount(x, 0);
-                          if (gridProvider.getGridCount(x, 0) != 4) {
-                            gridProvider.setPlayer();
-                          } else {
-                            if (gridProvider.getWinner(x, 0) == -1) {
-                              int winner = gridProvider.getPlayer() ? 1 : 0;
-                              gridProvider.setWinner(x, 0, winner);
-                            }
-                          }
-                        },
-                        child: verticalBar(gridProvider.getStick2(x, 0))),
-                    ...List.generate(
-                        grid_size,
-                        (y) => Row(
-                              children: [
-                                box(
-                                    gridProvider.getWinner(x, y) == 1
-                                        ? palette.pen
-                                        : palette.redPen,
-                                    visible:
-                                        gridProvider.getGridCount(x, y) == 4),
-                                InkWell(
-                                  onTap: () {
-                                    bool scored = false;
-                                    int winner =
-                                        gridProvider.getPlayer() ? 1 : 0;
-                                    if (gridProvider.getStick2(x, y + 1)) {
-                                      return;
-                                    }
-                                    gridProvider.incrementGridCount(x, y);
-                                    if (y != grid_size - 1) {
-                                      gridProvider.incrementGridCount(x, y + 1);
-                                    }
-                                    gridProvider.setDot2(x, y + 1, true);
 
-                                    if (gridProvider.getGridCount(x, y) == 4) {
-                                      if (gridProvider.getWinner(x, y) == -1) {
-                                        gridProvider.setWinner(x, y, winner);
-                                        scored = true;
-                                      }
-                                    }
-                                    if (y != grid_size - 1 &&
-                                        gridProvider.getGridCount(x, y + 1) ==
-                                            4) {
-                                      if (gridProvider.getWinner(x, y + 1) ==
-                                          -1) {
-                                        gridProvider.setWinner(
-                                            x, y + 1, winner);
-                                        scored = true;
-                                      }
-                                    }
-                                    if (scored == false) {
-                                      gridProvider.setPlayer();
-                                    }
-                                  },
-                                  child: verticalBar(
-                                      gridProvider.getStick2(x, y + 1)),
-                                ),
-                              ],
-                            )),
+    return Consumer<GameState>(builder: (context, gameState, child) {
+      return Center(
+        child: Column(
+          children: [
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      settings.player1Name.value,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Permanent Marker',
+                        color: palette.pen,
+                        fontSize: 15,
+                        height: 1,
+                      ),
+                    ),
+                    Text(
+                      settings.player2Name.value,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Permanent Marker',
+                        color: palette.redPen,
+                        fontSize: 15,
+                        height: 1,
+                      ),
+                    ),
                   ],
                 ),
-                // dot and bar
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    dot(),
-                    ...List.generate(
-                        grid_size,
-                        (y) => Row(
-                              children: [
-                                InkWell(
+                    Text(
+                      gridProvider.getp1().toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Permanent Marker',
+                        color: palette.pen,
+                        fontSize: 15,
+                        height: 1,
+                      ),
+                    ),
+                    Text(
+                      gridProvider.getp2().toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Permanent Marker',
+                        color: palette.redPen,
+                        fontSize: 15,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 60,
+            ),
+            Text(
+              gridProvider.getPlayer()
+                  ? "${settings.player1Name.value}'s turn"
+                  : "${settings.player2Name.value}'s turn",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Permanent Marker',
+                color: gridProvider.getPlayer() ? palette.pen : palette.redPen,
+                fontSize: 30,
+                height: 1,
+              ),
+            ),
+            SizedBox(
+              height: 60,
+            ),
+            // dot and Bar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                dot(),
+                ...List.generate(
+                    grid_size,
+                    (y) => Row(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                if (!gridProvider.getStick1(0, y)) {
+                                  gridProvider.incrementGridCount(0, y);
+                                }
+                                gridProvider.setDot1(0, y, true);
+                                if (gridProvider.getGridCount(0, y) != 4) {
+                                  gridProvider.setPlayer();
+                                } else {
+                                  if (gridProvider.getWinner(0, y) == -1) {
+                                    int winner =
+                                        gridProvider.getPlayer() ? 1 : 0;
+                                    gridProvider.setWinner(0, y, winner);
+                                  }
+                                }
+                                gameState.evaluate(gridProvider.getp1() +
+                                    gridProvider.getp2());
+                              },
+                              child:
+                                  horizontalBar(gridProvider.getStick1(0, y)),
+                            ),
+                            dot(),
+                          ],
+                        )),
+              ],
+            ),
+            ...List.generate(grid_size, (x) {
+              return Column(
+                children: [
+                  // bar and box
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      InkWell(
+                          onTap: () {
+                            if (gridProvider.getStick2(x, 0)) {
+                              return;
+                            }
+                            gridProvider.setDot2(x, 0, true);
+                            gridProvider.incrementGridCount(x, 0);
+                            if (gridProvider.getGridCount(x, 0) != 4) {
+                              gridProvider.setPlayer();
+                            } else {
+                              if (gridProvider.getWinner(x, 0) == -1) {
+                                int winner = gridProvider.getPlayer() ? 1 : 0;
+                                gridProvider.setWinner(x, 0, winner);
+                              }
+                            }
+                            gameState.evaluate(
+                                gridProvider.getp1() + gridProvider.getp2());
+                          },
+                          child: verticalBar(gridProvider.getStick2(x, 0))),
+                      ...List.generate(
+                          grid_size,
+                          (y) => Row(
+                                children: [
+                                  box(
+                                      gridProvider.getWinner(x, y) == 1
+                                          ? palette.pen
+                                          : palette.redPen,
+                                      visible:
+                                          gridProvider.getGridCount(x, y) == 4),
+                                  InkWell(
                                     onTap: () {
-                                      /// to keep track of current player in integer form, no bool to int like cpp :(
-                                      ///
+                                      bool scored = false;
                                       int winner =
                                           gridProvider.getPlayer() ? 1 : 0;
-
-                                      /// To keep check whether the player scored in current move
-                                      ///
-                                      bool scored = false;
-
-                                      if (gridProvider.getStick1(x + 1, y)) {
+                                      if (gridProvider.getStick2(x, y + 1)) {
                                         return;
                                       }
                                       gridProvider.incrementGridCount(x, y);
-                                      if (x != grid_size - 1) {
+                                      if (y != grid_size - 1) {
                                         gridProvider.incrementGridCount(
-                                            x + 1, y);
+                                            x, y + 1);
                                       }
+                                      gridProvider.setDot2(x, y + 1, true);
 
-                                      /// Now checking for the block with coordinate {x, y}
-                                      ///
-                                      /// if eligible for the being part of someone score
                                       if (gridProvider.getGridCount(x, y) ==
                                           4) {
-                                        /// checking whether the block is already assigned to someone.
                                         if (gridProvider.getWinner(x, y) ==
                                             -1) {
-                                          /// enter here when block not assigned to anyone
-                                          ///
-                                          /// Now assign the block win to current player
                                           gridProvider.setWinner(x, y, winner);
-
-                                          /// Telling our code that player have scored
-                                          ///
                                           scored = true;
                                         }
                                       }
+                                      if (y != grid_size - 1 &&
+                                          gridProvider.getGridCount(x, y + 1) ==
+                                              4) {
+                                        if (gridProvider.getWinner(x, y + 1) ==
+                                            -1) {
+                                          gridProvider.setWinner(
+                                              x, y + 1, winner);
+                                          scored = true;
+                                        }
+                                      }
+                                      if (scored == false) {
+                                        gridProvider.setPlayer();
+                                      }
 
-                                      /// Now checking for the block with coordinate {x+1, y}
-                                      ///
-                                      /// if the stick even have next block, the adjacent case
-                                      if (x != grid_size - 1) {
-                                        /// we know now the block exist, pheww!
+                                      gameState.evaluate(gridProvider.getp1() +
+                                          gridProvider.getp2());
+                                    },
+                                    child: verticalBar(
+                                        gridProvider.getStick2(x, y + 1)),
+                                  ),
+                                ],
+                              )),
+                    ],
+                  ),
+                  // dot and bar
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      dot(),
+                      ...List.generate(
+                          grid_size,
+                          (y) => Row(
+                                children: [
+                                  InkWell(
+                                      onTap: () {
+                                        /// to keep track of current player in integer form, no bool to int like cpp :(
                                         ///
-                                        /// below if statement checks whether
-                                        /// the block is eligible to be part of someone score
-                                        if (gridProvider.getGridCount(
-                                                x + 1, y) ==
+                                        int winner =
+                                            gridProvider.getPlayer() ? 1 : 0;
+
+                                        /// To keep check whether the player scored in current move
+                                        ///
+                                        bool scored = false;
+
+                                        if (gridProvider.getStick1(x + 1, y)) {
+                                          return;
+                                        }
+                                        gridProvider.incrementGridCount(x, y);
+                                        if (x != grid_size - 1) {
+                                          gridProvider.incrementGridCount(
+                                              x + 1, y);
+                                        }
+
+                                        /// Now checking for the block with coordinate {x, y}
+                                        ///
+                                        /// if eligible for the being part of someone score
+                                        if (gridProvider.getGridCount(x, y) ==
                                             4) {
-                                          /// Making sure the {x+1, y} block is not assigned.
-                                          ///
-                                          if (gridProvider.getWinner(
-                                                  x + 1, y) ==
+                                          /// checking whether the block is already assigned to someone.
+                                          if (gridProvider.getWinner(x, y) ==
                                               -1) {
-                                            /// now assignation of the current block to current player
+                                            /// enter here when block not assigned to anyone
                                             ///
+                                            /// Now assign the block win to current player
                                             gridProvider.setWinner(
-                                                x + 1, y, winner);
+                                                x, y, winner);
 
                                             /// Telling our code that player have scored
                                             ///
                                             scored = true;
                                           }
                                         }
-                                      }
 
-                                      /// if the player have scored, he gets another chance, yaay!
-                                      ///
-                                      if (scored == false) {
-                                        gridProvider.setPlayer();
-                                      }
-                                      /// marking the stick touched :)
-                                      gridProvider.setDot1(x + 1, y, true);
-                                    },
-                                    child: horizontalBar(
-                                        gridProvider.getStick1(x + 1, y))),
-                                dot(),
-                              ],
-                            )),
-                  ],
-                ),
-              ],
-            );
-          })
-        ],
-      ),
-    );
+                                        /// Now checking for the block with coordinate {x+1, y}
+                                        ///
+                                        /// if the stick even have next block, the adjacent case
+                                        if (x != grid_size - 1) {
+                                          /// we know now the block exist, pheww!
+                                          ///
+                                          /// below if statement checks whether
+                                          /// the block is eligible to be part of someone score
+                                          if (gridProvider.getGridCount(
+                                                  x + 1, y) ==
+                                              4) {
+                                            /// Making sure the {x+1, y} block is not assigned.
+                                            ///
+                                            if (gridProvider.getWinner(
+                                                    x + 1, y) ==
+                                                -1) {
+                                              /// now assignation of the current block to current player
+                                              ///
+                                              gridProvider.setWinner(
+                                                  x + 1, y, winner);
+
+                                              /// Telling our code that player have scored
+                                              ///
+                                              scored = true;
+                                            }
+                                          }
+                                        }
+
+                                        /// if the player have scored, he gets another chance, yaay!
+                                        ///
+                                        if (scored == false) {
+                                          gridProvider.setPlayer();
+                                        }
+
+                                        /// marking the stick touched :)
+                                        gridProvider.setDot1(x + 1, y, true);
+
+                                        /// checking if the game has ended
+                                        ///
+                                        ///
+                                        gameState.evaluate(
+                                            gridProvider.getp1() +
+                                                gridProvider.getp2());
+                                      },
+                                      child: horizontalBar(
+                                          gridProvider.getStick1(x + 1, y))),
+                                  dot(),
+                                ],
+                              )),
+                    ],
+                  ),
+                ],
+              );
+            })
+          ],
+        ),
+      );
+    });
   }
 }
 
