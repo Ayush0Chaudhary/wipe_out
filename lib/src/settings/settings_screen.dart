@@ -104,6 +104,7 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
             _gap,
+            Text("Made by Kash and Panda"),
           ],
         ),
         rectangularMenuArea: FilledButton(

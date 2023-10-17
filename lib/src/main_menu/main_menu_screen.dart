@@ -30,15 +30,31 @@ class MainMenuScreen extends StatelessWidget {
         squarishMainArea: Center(
           child: Transform.rotate(
             angle: -0.1,
-            child:  Text(
-              'MDGSpace game!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Permanent Marker',
-                color: palette.redPen,
-                fontSize: 55,
-                height: 1,
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Pipo!\n',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Permanent Marker',
+                    color: palette.redPen,
+                    fontSize: 55,
+                    height: 1,
+                  ),
+                ),
+                // SizedBox(height: 2,),
+                Text(
+                  'MDGSpace game!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Permanent Marker',
+                    color: palette.ink,
+                    fontSize: 40,
+                    height: 1,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -94,12 +110,12 @@ class MainMenuScreen extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // change palette
-        },
-        child: const Icon(Icons.play_arrow),
-      )
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     // change palette
+      //   },
+      //   child: const Icon(Icons.play_arrow),
+      // )
     );
   }
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "927927619730",
+    "project_id": "pipo-7550c",
+    "storage_bucket": "pipo-7550c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927927619730:android:799cf42c849e166e29964b",
+        "android_client_info": {
+          "package_name": "com.example.game_template"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUmiLLBqdQQPYBHFjX8QV2NUsp0I5cRRM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
