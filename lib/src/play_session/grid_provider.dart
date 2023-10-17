@@ -60,7 +60,6 @@ class Grid extends ChangeNotifier {
   }
 
   void incrementGridCount(int x, int y) {
-
     if (_gridCount[x][y] != 4) {
       _gridCount[x][y]++;
     }

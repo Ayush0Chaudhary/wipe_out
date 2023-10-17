@@ -72,7 +72,7 @@ class _CustomNameDialogState extends State<CustomNameDialog> {
 
   @override
   void didChangeDependencies() {
-    _controller.text = widget.player==Player.player1
+    _controller.text = widget.player == Player.player1
         ? context.read<SettingsController>().player1Name.value
         : context.read<SettingsController>().player2Name.value;
     super.didChangeDependencies();

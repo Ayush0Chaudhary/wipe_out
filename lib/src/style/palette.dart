@@ -44,6 +44,4 @@ class Palette {
   void changeRedPen(Color newColor) {
     redPen = newColor;
   }
-
-
 }

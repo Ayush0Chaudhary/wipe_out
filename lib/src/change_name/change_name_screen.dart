@@ -27,9 +27,11 @@ class ChangeNameScreen extends StatelessWidget {
         rectangularMenuArea: Column(
           children: [
             _gap,
-            FilledButton(onPressed: () {
-              GoRouter.of(context).go('/play/session');
-            }, child: Text('Start'))
+            FilledButton(
+                onPressed: () {
+                  GoRouter.of(context).go('/play/session');
+                },
+                child: Text('Start'))
           ],
         ),
       ),
