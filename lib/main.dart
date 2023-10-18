@@ -42,6 +42,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -58,7 +59,6 @@ Future<void> main() async {
     );
   });
 
-  WidgetsFlutterBinding.ensureInitialized();
 
   // TODO: To enable Firebase Crashlytics, uncomment the following line.
   // See the 'Crashlytics' section of the main README.md file for details.

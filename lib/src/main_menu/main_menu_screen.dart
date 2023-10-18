@@ -25,91 +25,149 @@ class MainMenuScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: palette.backgroundMain,
-      body: ResponsiveScreen(
-        mainAreaProminence: 0.45,
-        squarishMainArea: Center(
-          child: Transform.rotate(
-            angle: -0.1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Center(
+              child: Transform.rotate(
+                angle: -0.1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Pipo!\n',
+                      // textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Permanent Marker',
+                        color: palette.redPen,
+                        fontSize: 55 ,
+                        height: 1,
+                      ),
+                    ),
+                    // SizedBox(height: 2,),
+                    Text(
+                      'MDGSpace game!',
+                      // textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Permanent Marker',
+                        color: palette.ink,
+                        fontSize: 40,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  'Pipo!\n',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Permanent Marker',
-                    color: palette.redPen,
-                    fontSize: 55,
-                    height: 1,
+                FilledButton(
+                  onPressed: () {
+                    audioController.playSfx(SfxType.buttonTap);
+                    GoRouter.of(context).go('/play');
+                  },
+                  child: const Text('Play'),
+                ),
+                _gap,
+                if (gamesServicesController != null) ...[
+                  _hideUntilReady(
+                    ready: gamesServicesController.signedIn,
+                    child: FilledButton(
+                      onPressed: () =>
+                          gamesServicesController.showAchievements(),
+                      child: const Text('Achievements'),
+                    ),
+                  ),
+                  _gap,
+                  _hideUntilReady(
+                    ready: gamesServicesController.signedIn,
+                    child: FilledButton(
+                      onPressed: () =>
+                          gamesServicesController.showLeaderboard(),
+                      child: const Text('Leaderboard'),
+                    ),
+                  ),
+                  _gap,
+                ],
+                FilledButton(
+                  onPressed: () => GoRouter.of(context).push('/settings'),
+                  child: const Text('Settings'),
+                ),
+                _gap,
+                Padding(
+                  padding: const EdgeInsets.only(top: 32),
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: settingsController.muted,
+                    builder: (context, muted, child) {
+                      return IconButton(
+                        onPressed: () => settingsController.toggleMuted(),
+                        icon: Icon(muted ? Icons.volume_off : Icons.volume_up),
+                      );
+                    },
                   ),
                 ),
-                // SizedBox(height: 2,),
-                Text(
-                  'MDGSpace game!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Permanent Marker',
-                    color: palette.ink,
-                    fontSize: 40,
-                    height: 1,
-                  ),
-                ),
+                _gap,
+                const Text('Music by Mr Smith'),
+                _gap,
               ],
             ),
-          ),
-        ),
-        rectangularMenuArea: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FilledButton(
-              onPressed: () {
-                audioController.playSfx(SfxType.buttonTap);
-                GoRouter.of(context).go('/play');
-              },
-              child: const Text('Play'),
-            ),
-            _gap,
-            if (gamesServicesController != null) ...[
-              _hideUntilReady(
-                ready: gamesServicesController.signedIn,
-                child: FilledButton(
-                  onPressed: () => gamesServicesController.showAchievements(),
-                  child: const Text('Achievements'),
-                ),
-              ),
-              _gap,
-              _hideUntilReady(
-                ready: gamesServicesController.signedIn,
-                child: FilledButton(
-                  onPressed: () => gamesServicesController.showLeaderboard(),
-                  child: const Text('Leaderboard'),
-                ),
-              ),
-              _gap,
-            ],
-            FilledButton(
-              onPressed: () => GoRouter.of(context).push('/settings'),
-              child: const Text('Settings'),
-            ),
-            _gap,
-            Padding(
-              padding: const EdgeInsets.only(top: 32),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: settingsController.muted,
-                builder: (context, muted, child) {
-                  return IconButton(
-                    onPressed: () => settingsController.toggleMuted(),
-                    icon: Icon(muted ? Icons.volume_off : Icons.volume_up),
-                  );
-                },
-              ),
-            ),
-            _gap,
-            const Text('Music by Mr Smith'),
-            _gap,
           ],
         ),
-      ),
+        
+        // Column(
+        //   mainAxisAlignment: MainAxisAlignment.end,
+        //   children: [
+        //     FilledButton(
+        //       onPressed: () {
+        //         audioController.playSfx(SfxType.buttonTap);
+        //         GoRouter.of(context).go('/play');
+        //       },
+        //       child: const Text('Play'),
+        //     ),
+        //     _gap,
+        //     if (gamesServicesController != null) ...[
+        //       _hideUntilReady(
+        //         ready: gamesServicesController.signedIn,
+        //         child: FilledButton(
+        //           onPressed: () => gamesServicesController.showAchievements(),
+        //           child: const Text('Achievements'),
+        //         ),
+        //       ),
+        //       _gap,
+        //       _hideUntilReady(
+        //         ready: gamesServicesController.signedIn,
+        //         child: FilledButton(
+        //           onPressed: () => gamesServicesController.showLeaderboard(),
+        //           child: const Text('Leaderboard'),
+        //         ),
+        //       ),
+        //       _gap,
+        //     ],
+        //     FilledButton(
+        //       onPressed: () => GoRouter.of(context).push('/settings'),
+        //       child: const Text('Settings'),
+        //     ),
+        //     _gap,
+        //     Padding(
+        //       padding: const EdgeInsets.only(top: 32),
+        //       child: ValueListenableBuilder<bool>(
+        //         valueListenable: settingsController.muted,
+        //         builder: (context, muted, child) {
+        //           return IconButton(
+        //             onPressed: () => settingsController.toggleMuted(),
+        //             icon: Icon(muted ? Icons.volume_off : Icons.volume_up),
+        //           );
+        //         },
+        //       ),
+        //     ),
+        //     _gap,
+        //     const Text('Music by Mr Smith'),
+        //     _gap,
+        //   ],
+        // ),
+      
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () {
       //     // change palette
