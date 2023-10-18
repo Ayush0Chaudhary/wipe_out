@@ -230,7 +230,7 @@ class MyApp extends StatelessWidget {
               var grid = Grid();
               return grid;
             },
-            ),
+          ),
           Provider<GamesServicesController?>.value(
               value: gamesServicesController),
           Provider<AdsController?>.value(value: adsController),

@@ -39,14 +39,8 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             _gap,
-            const _NameChangeLine(
-              'Player1:',
-              Player.player1
-            ),
-            const _NameChangeLine(
-              'Player2:',
-              Player.player2
-            ),
+            const _NameChangeLine('Player1:', Player.player1),
+            const _NameChangeLine('Player2:', Player.player2),
             ValueListenableBuilder<bool>(
               valueListenable: settings.soundsOn,
               builder: (context, soundsOn, child) => _SettingsLine(
@@ -130,7 +124,7 @@ class _NameChangeLine extends StatelessWidget {
 
     return InkResponse(
       highlightShape: BoxShape.rectangle,
-      onTap: () => showCustomNameDialog(context,player),
+      onTap: () => showCustomNameDialog(context, player),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Row(
