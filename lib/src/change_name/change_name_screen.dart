@@ -14,27 +14,38 @@ class ChangeNameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ResponsiveScreen(
-        squarishMainArea: Center(
-          child: Column(
-            children: const [
-              _NameChangeLine('P1 :', Player.player1),
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Center(
+                child: Column(
+                  children: const [
+                    _NameChangeLine('P1 :', Player.player1),
+                    _gap,
+                    _NameChangeLine('P2 :', Player.player2),
+                  ],
+                ),
+              ),
+          Column(
+            children: [
               _gap,
-              _NameChangeLine('P2 :', Player.player2),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: FilledButton(
+                    
+                    onPressed: () {
+                      GoRouter.of(context).go('/play/session');
+                    },
+                    child: Text('Start')),
+              ),
+            
             ],
           ),
-        ),
-        rectangularMenuArea: Column(
-          children: [
-            _gap,
-            FilledButton(
-                onPressed: () {
-                  GoRouter.of(context).go('/play/session');
-                },
-                child: Text('Start'))
           ],
         ),
       ),
+      
     );
   }
 }
